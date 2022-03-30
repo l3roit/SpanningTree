@@ -9,10 +9,11 @@ namespace SpanningTree
         private static readonly int _depth = 20;
         private static void Main(string[] args) 
         {
-            ParseInput("E:\\C# Projects\\SpanningTree\\input.txt");
+            ParseInput("E:\\C# Projects\\SpanningTree\\input.txt"); // initialise all vertexes with themselfs as root nodes
+            //at start each vertex thinks it is the root so ToRootId = Id, RootWeight = Weight, RootId = Id, Cost = 0 (already at root)
 
             Random rnd = new Random();
-            var startNode = _graph.Vertices[rnd.Next(0, _graph.Vertices.Count - 1)].ID;
+            var startNode = _graph.Vertices[rnd.Next(0, _graph.Vertices.Count - 1)].ID; //randomly sort list --> algorithm starts with first list element
 
             CalcTree(); //Start Node doesn't matter for success --> startNode is first element in Vertex List
 
@@ -23,25 +24,26 @@ namespace SpanningTree
 
         private static void CalcTree()
         {
-            for (var i = 0; i < _depth; i++)
+            for (var i = 0; i < _depth; i++) //run process multiple times
             {
-                foreach (var vtx in _graph.Vertices)
+                foreach (var vtx in _graph.Vertices) //run foreach vertex
                 {
-                    var edges = _graph.Edges.Where(x => x.Vertex1 == vtx.ID || x.Vertex2 == vtx.ID);
+                    var edges = _graph.Edges.Where(x => x.Vertex1 == vtx.ID || x.Vertex2 == vtx.ID); //get adjacent edges from vertex
 
                     var aVtx = new List<Vertex>();
                     foreach (var edge in edges)
-                        aVtx.AddRange(_graph.Vertices.Where(x => (x.ID == edge.Vertex1 || x.ID == edge.Vertex2) && x.ID != vtx.ID));
+                        aVtx.AddRange(_graph.Vertices.Where(x => (x.ID == edge.Vertex1 || x.ID == edge.Vertex2) && x.ID != vtx.ID)); //get adjacent vertecies from current vertex
 
-                    foreach (var v in aVtx)
+                    foreach (var v in aVtx) // run through adjacent vertecies
                     {
-                        var edge = _graph.Edges.Where(x => (x.Vertex1 == v.ID && x.Vertex2 == vtx.ID) || (x.Vertex2 == v.ID && x.Vertex1 == vtx.ID)).First();
+                        var edge = _graph.Edges.Where(x => (x.Vertex1 == v.ID && x.Vertex2 == vtx.ID) || (x.Vertex2 == v.ID && x.Vertex1 == vtx.ID)).First(); // get edge from vertext and adjacent vertext
 
-                        if(v.RootWeight > vtx.RootWeight || ((v.RootWeight == vtx.RootWeight) && v.Cost > (vtx.Cost + edge.Weight))){ 
-                            v.ToRootID = vtx.ID;
-                            v.RootID = vtx.RootID;
-                            v.RootWeight = vtx.RootWeight;
-                            v.Cost = vtx.Cost + edge.Weight;
+                        if(v.RootWeight > vtx.RootWeight || // compare root weights --> weight is lower = new way to root
+                        ((v.RootWeight == vtx.RootWeight) && v.Cost > (vtx.Cost + edge.Weight))){  // rootweights are same and costs to root are faster 
+                            v.ToRootID = vtx.ID; // vertex is new waypoint to root for adjacent vertex
+                            v.RootID = vtx.RootID; // adjacent vertex root is same then vertex
+                            v.RootWeight = vtx.RootWeight;  // weight of root vertex are the same
+                            v.Cost = vtx.Cost + edge.Weight; // cost is vertex + weight of edge
                         }
                     }          
                 }
@@ -52,20 +54,22 @@ namespace SpanningTree
             var edges = new List<Edge>();
 
             foreach (var vtx in _graph.Vertices){
-                if (vtx.ID != vtx.RootID)
+                if (vtx.ID != vtx.RootID) // check if its the root vertex
                     edges.Add(_graph.Edges.Where(x => (x.Vertex1 == vtx.ToRootID && x.Vertex2 == vtx.ID) || (x.Vertex2 == vtx.ToRootID && x.Vertex1 == vtx.ID)).First());
             }
 
             return edges;
         }
+
+        //parses graph config
         private static void ParseInput(string path)
         {
             foreach (var line in File.ReadAllLines(path))
             {
-                if (string.IsNullOrEmpty(line) || line.StartsWith(@"\\"))
+                if (string.IsNullOrEmpty(line) || line.StartsWith(@"\\")) //skip empty line and command line
                     continue;
 
-                if (line.Contains("="))
+                if (line.Contains("=")) //parse vertex config
                 {
                     var l = line.Replace(";", "").Replace(" ", "").Split("=");
 
@@ -79,7 +83,7 @@ namespace SpanningTree
                         Cost = 0
                     });
                 }
-                else if (line.Contains(":"))
+                else if (line.Contains(":")) //parse edge config
                 {
                     var l = line.Replace(";", "").Replace(" ", "").Split('-', ':');
 
@@ -93,11 +97,12 @@ namespace SpanningTree
                         Weight = int.Parse(l[2])
                     });
                 }
-                else if (line.Contains("Graph"))
+                else if (line.Contains("Graph")) // parse graph name
                     _graph.GraphName = line.Replace("Graph ", "").Replace(" {", "");
             }
         }
 
+        //outputs graph config in console
         private static void OutputSpanningTree( List<Edge> res)
         {
             Console.WriteLine("Graph " + _graph.GraphName + " {");
