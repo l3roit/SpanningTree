@@ -12,16 +12,15 @@ namespace SpanningTree
             ParseInput("E:\\C# Projects\\SpanningTree\\input.txt"); // initialise all vertexes with themselfs as root nodes
             //at start each vertex thinks it is the root so ToRootId = Id, RootWeight = Weight, RootId = Id, Cost = 0 (already at root)
 
-            Random rnd = new Random();
-            var startNode = _graph.Vertices[rnd.Next(0, _graph.Vertices.Count - 1)].ID; //randomly sort list --> algorithm starts with first list element
+            var rnd = new Random();
+            _graph.Vertices = _graph.Vertices.OrderBy(x => rnd.Next()).ToList(); //randomly sort list --> algorithm starts with first list element
 
-            CalcTree(); //Start Node doesn't matter for success --> startNode is first element in Vertex List
-
+            CalcTree(); //Start Node doesn't matter for success
+        
             var res = GetMinSpanningTree();
 
             OutputSpanningTree(res);
         }
-
         private static void CalcTree()
         {
             for (var i = 0; i < _depth; i++) //run process multiple times
@@ -45,7 +44,7 @@ namespace SpanningTree
                             v.RootWeight = vtx.RootWeight;  // weight of root vertex are the same
                             v.Cost = vtx.Cost + edge.Weight; // cost is vertex + weight of edge
                         }
-                    }          
+                    }
                 }
             }
         }
