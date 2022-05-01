@@ -65,7 +65,7 @@ namespace SpanningTree
         {
             foreach (var line in File.ReadAllLines(path))
             {
-                if (string.IsNullOrEmpty(line) || line.StartsWith(@"\\")) //skip empty line and command line
+                if (string.IsNullOrEmpty(line) || line.StartsWith(@"//")) //skip empty line and command line
                     continue;
 
                 if (line.Contains("=")) //parse vertex config
